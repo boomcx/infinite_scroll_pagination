@@ -165,8 +165,8 @@ class _PagedSliverBuilderState<PageKeyType, ItemType>
         // }
         _hasRequestedNextPage = true;
       }
-      print(
-          '--- _scrollController.addListener ${_scrollController.position.maxScrollExtent} -- ${_scrollController.position.pixels}');
+      // print(
+      //     '--- _scrollController.addListener ${_scrollController.position.maxScrollExtent} -- ${_scrollController.position.pixels}');
     });
   }
 
