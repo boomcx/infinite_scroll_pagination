@@ -17,6 +17,7 @@ class PagedChildBuilderDelegate<ItemType> {
     this.newPageErrorIndicatorBuilder,
     this.firstPageProgressIndicatorBuilder,
     this.newPageProgressIndicatorBuilder,
+    this.newPageProgressManualBuilder,
     this.noItemsFoundIndicatorBuilder,
     this.noMoreItemsIndicatorBuilder,
     this.animateTransitions = false,
@@ -37,6 +38,9 @@ class PagedChildBuilderDelegate<ItemType> {
 
   /// The builder for a new page's progress indicator.
   final WidgetBuilder? newPageProgressIndicatorBuilder;
+
+  /// The builder for a new page's progress manual indicator.
+  final WidgetBuilder? newPageProgressManualBuilder;
 
   /// The builder for a no items list indicator.
   final WidgetBuilder? noItemsFoundIndicatorBuilder;

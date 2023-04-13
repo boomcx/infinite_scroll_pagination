@@ -11,6 +11,6 @@ class CharacterGridItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => CachedNetworkImage(
-        imageUrl: character.pictureUrl,
+        imageUrl: character.url,
       );
 }

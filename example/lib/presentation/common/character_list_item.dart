@@ -12,11 +12,14 @@ class CharacterListItem extends StatelessWidget {
   final CharacterSummary character;
 
   @override
-  Widget build(BuildContext context) => ListTile(
-        leading: CircleAvatar(
-          radius: 20,
-          backgroundImage: CachedNetworkImageProvider(character.pictureUrl),
+  Widget build(BuildContext context) => SizedBox(
+        height: 100,
+        child: ListTile(
+          leading: CircleAvatar(
+            radius: 20,
+            backgroundImage: CachedNetworkImageProvider(character.url),
+          ),
+          title: Text(character.author),
         ),
-        title: Text(character.name),
       );
 }

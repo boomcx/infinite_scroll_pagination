@@ -18,6 +18,7 @@ class PagedSliverGrid<PageKeyType, ItemType> extends StatelessWidget {
     required this.pagingController,
     required this.builderDelegate,
     required this.gridDelegate,
+    required this.scrollController,
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
     this.addSemanticIndexes = true,
@@ -67,10 +68,14 @@ class PagedSliverGrid<PageKeyType, ItemType> extends StatelessWidget {
   /// Corresponds to [PagedSliverBuilder.shrinkWrapFirstPageIndicators].
   final bool shrinkWrapFirstPageIndicators;
 
+  // Corresponds to [ScrollView.controller].
+  final ScrollController scrollController;
+
   @override
   Widget build(BuildContext context) =>
       PagedSliverBuilder<PageKeyType, ItemType>(
         pagingController: pagingController,
+        scrollController: scrollController,
         builderDelegate: builderDelegate,
         completedListingBuilder: (
           context,

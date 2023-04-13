@@ -69,15 +69,15 @@ class _CharacterSliverListState extends State<CharacterSliverList> {
           CharacterSearchInputSliver(
             onChanged: (searchTerm) => _updateSearchTerm(searchTerm),
           ),
-          PagedSliverList<int, CharacterSummary>(
-            pagingController: _pagingController,
-            builderDelegate: PagedChildBuilderDelegate<CharacterSummary>(
-              animateTransitions: true,
-              itemBuilder: (context, item, index) => CharacterListItem(
-                character: item,
-              ),
-            ),
-          ),
+          // PagedSliverList<int, CharacterSummary>(
+          //   pagingController: _pagingController,
+          //   builderDelegate: PagedChildBuilderDelegate<CharacterSummary>(
+          //     animateTransitions: true,
+          //     itemBuilder: (context, item, index) => CharacterListItem(
+          //       character: item,
+          //     ),
+          //   ),
+          // ),
         ],
       );
 

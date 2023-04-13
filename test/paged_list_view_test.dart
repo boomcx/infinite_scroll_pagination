@@ -41,12 +41,14 @@ Future<void> _pumpPagedListView({
         home: Scaffold(
           body: separatorBuilder == null
               ? PagedListView(
+                  scrollController: ScrollController(),
                   pagingController: pagingController,
                   builderDelegate: PagedChildBuilderDelegate<String>(
                     itemBuilder: _buildItem,
                   ),
                 )
               : PagedListView.separated(
+                  scrollController: ScrollController(),
                   pagingController: pagingController,
                   builderDelegate: PagedChildBuilderDelegate<String>(
                     itemBuilder: _buildItem,

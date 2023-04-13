@@ -1,6 +1,5 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:infinite_scroll_pagination/src/ui/default_indicators/first_page_error_indicator.dart';
@@ -45,6 +44,7 @@ typedef LoadingListingBuilder = Widget Function(
 class PagedSliverBuilder<PageKeyType, ItemType> extends StatefulWidget {
   const PagedSliverBuilder({
     required this.pagingController,
+    required this.scrollController,
     required this.builderDelegate,
     required this.loadingListingBuilder,
     required this.errorListingBuilder,
@@ -82,6 +82,8 @@ class PagedSliverBuilder<PageKeyType, ItemType> extends StatefulWidget {
   /// Defaults to false.
   final bool shrinkWrapFirstPageIndicators;
 
+  final ScrollController scrollController;
+
   @override
   _PagedSliverBuilderState<PageKeyType, ItemType> createState() =>
       _PagedSliverBuilderState<PageKeyType, ItemType>();
@@ -94,6 +96,8 @@ class _PagedSliverBuilderState<PageKeyType, ItemType>
 
   PagedChildBuilderDelegate<ItemType> get _builderDelegate =>
       widget.builderDelegate;
+
+  ScrollController get _scrollController => widget.scrollController;
 
   bool get _shrinkWrapFirstPageIndicators =>
       widget.shrinkWrapFirstPageIndicators;
@@ -118,6 +122,10 @@ class _PagedSliverBuilderState<PageKeyType, ItemType>
       _builderDelegate.newPageProgressIndicatorBuilder ??
       (_) => const NewPageProgressIndicator();
 
+  WidgetBuilder get _newPageProgressManualBuilder =>
+      _builderDelegate.newPageProgressManualBuilder ??
+      (_) => const NewPageProgressManual();
+
   WidgetBuilder get _noItemsFoundIndicatorBuilder =>
       _builderDelegate.noItemsFoundIndicatorBuilder ??
       (_) => NoItemsFoundIndicator();
@@ -125,8 +133,8 @@ class _PagedSliverBuilderState<PageKeyType, ItemType>
   WidgetBuilder? get _noMoreItemsIndicatorBuilder =>
       _builderDelegate.noMoreItemsIndicatorBuilder;
 
-  int get _invisibleItemsThreshold =>
-      _pagingController.invisibleItemsThreshold ?? 3;
+  // int get _invisibleItemsThreshold =>
+  //     _pagingController.invisibleItemsThreshold ?? 1;
 
   int get _itemCount => _pagingController.itemCount;
 
@@ -137,6 +145,31 @@ class _PagedSliverBuilderState<PageKeyType, ItemType>
   /// Avoids duplicate requests on rebuilds.
   bool _hasRequestedNextPage = false;
 
+  final PagingManualController _manualController =
+      PagingManualController(PagingManualState());
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(() {
+      final maxScrollExtent = _scrollController.position.maxScrollExtent;
+      final pixels = _scrollController.position.pixels;
+      // 滚动到底部时加载更多
+      if (_hasNextPage && pixels == maxScrollExtent && !_hasRequestedNextPage) {
+        // Schedules the request for the end of this frame.
+        // if (_scrollController.offset > _lastScrollOffset) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _pagingController.notifyPageRequestListeners(_nextKey!);
+        });
+        // _lastScrollOffset = _scrollController.offset;
+        // }
+        _hasRequestedNextPage = true;
+      }
+      print(
+          '--- _scrollController.addListener ${_scrollController.position.maxScrollExtent} -- ${_scrollController.position.pixels}');
+    });
+  }
+
   @override
   Widget build(BuildContext context) => ListenableListener(
         listenable: _pagingController,
@@ -144,6 +177,7 @@ class _PagedSliverBuilderState<PageKeyType, ItemType>
           final status = _pagingController.value.status;
 
           if (status == PagingStatus.loadingFirstPage) {
+            _manualController.init();
             _pagingController.notifyPageRequestListeners(
               _pagingController.firstPageKey,
             );
@@ -160,19 +194,45 @@ class _PagedSliverBuilderState<PageKeyType, ItemType>
             final itemList = _pagingController.itemList;
             switch (pagingState.status) {
               case PagingStatus.ongoing:
+                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                  _manualController.updateLoading(false);
+
+                  final sliver = context.findRenderObject();
+                  if (sliver is RenderSliver) {
+                    // final constraints = sliver.constraints;
+                    final geometry = sliver.geometry!;
+                    // print(
+                    //     '----------- ${sliver.geometry}-- --${sliver.constraints}');
+                    final status = geometry.scrollExtent > geometry.paintExtent;
+                    _manualController.updateShowLoader(!status);
+                    // geometry.paintExtent == constraints.viewportMainAxisExtent;
+                  }
+                });
+
                 child = widget.loadingListingBuilder(
                   context,
-                  // We must create this closure to close over the [itemList]
-                  // value. That way, we are safe if [itemList] value changes
-                  // while Flutter rebuilds the widget (due to animations, for
-                  // example.)
                   (context, index) => _buildListItemWidget(
                     context,
                     index,
                     itemList!,
                   ),
                   _itemCount,
-                  _newPageProgressIndicatorBuilder,
+                  (_) => GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () {
+                      if (_manualController.value.showLoader) {
+                        _manualController.updateLoading(true);
+                        _pagingController.notifyPageRequestListeners(_nextKey!);
+                      }
+                    },
+                    child: ValueListenableBuilder<PagingManualState>(
+                      valueListenable: _manualController,
+                      builder: (context, value, child) =>
+                          value.showLoader && !value.isLoading
+                              ? _newPageProgressManualBuilder.call(context)
+                              : _newPageProgressIndicatorBuilder.call(context),
+                    ),
+                  ),
                 );
                 break;
               case PagingStatus.completed:
@@ -236,34 +296,37 @@ class _PagedSliverBuilderState<PageKeyType, ItemType>
         ),
       );
 
+  double _lastScrollOffset = 0;
+
   /// Connects the [_pagingController] with the [_builderDelegate] in order to
   /// create a list item widget and request more items if needed.
   Widget _buildListItemWidget(
-    BuildContext context,
-    int index,
-    List<ItemType> itemList,
-  ) {
-    if (!_hasRequestedNextPage) {
-      final newPageRequestTriggerIndex =
-          max(0, _itemCount - _invisibleItemsThreshold);
+      BuildContext context, int index, List<ItemType> itemList) {
+    // if (!_hasRequestedNextPage) {
+    //   final newPageRequestTriggerIndex =
+    //       max(0, _itemCount - _invisibleItemsThreshold);
 
-      final isBuildingTriggerIndexItem = index == newPageRequestTriggerIndex;
+    //   final isBuildingTriggerIndexItem = index == newPageRequestTriggerIndex;
 
-      if (_hasNextPage && isBuildingTriggerIndexItem) {
-        // Schedules the request for the end of this frame.
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _pagingController.notifyPageRequestListeners(_nextKey!);
-        });
-        _hasRequestedNextPage = true;
-      }
-    }
+    //   if (_hasNextPage && isBuildingTriggerIndexItem && isAutoLoading) {
+    //     // Schedules the request for the end of this frame.
+    //     if (_scrollController.offset > _lastScrollOffset) {
+    //       WidgetsBinding.instance.addPostFrameCallback((_) {
+    //         _pagingController.notifyPageRequestListeners(_nextKey!);
+    //       });
+    //       _lastScrollOffset = _scrollController.offset;
+    //     }
+    //     _hasRequestedNextPage = true;
+    //   }
+    // }
 
     final item = itemList[index];
-    return _builderDelegate.itemBuilder(context, item, index);
+    final child = _builderDelegate.itemBuilder(context, item, index);
+    return child;
   }
 }
 
-extension on PagingController {
+extension PagingControllerExt on PagingController {
   /// The loaded items count.
   int get itemCount => itemList?.length ?? 0;
 

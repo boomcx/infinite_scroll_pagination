@@ -49,6 +49,7 @@ class _CharacterSliverGridState extends State<CharacterSliverGrid> {
             ),
           ),
           PagedSliverGrid<int, CharacterSummary>(
+            scrollController: ScrollController(),
             pagingController: _pagingController,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               childAspectRatio: 100 / 150,

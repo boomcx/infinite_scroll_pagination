@@ -228,6 +228,7 @@ Future<void> _pumpPagedSliverList({
             slivers: [
               if (separatorBuilder == null)
                 PagedSliverList(
+                  scrollController: ScrollController(),
                   pagingController: pagingController,
                   builderDelegate: PagedChildBuilderDelegate<String>(
                     itemBuilder: _buildItem,
@@ -245,6 +246,7 @@ Future<void> _pumpPagedSliverList({
                 )
               else
                 PagedSliverList.separated(
+                  scrollController: ScrollController(),
                   pagingController: pagingController,
                   builderDelegate: PagedChildBuilderDelegate<String>(
                     itemBuilder: _buildItem,

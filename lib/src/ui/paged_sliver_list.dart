@@ -19,6 +19,7 @@ class PagedSliverList<PageKeyType, ItemType> extends StatelessWidget {
   const PagedSliverList({
     required this.pagingController,
     required this.builderDelegate,
+    required this.scrollController,
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
     this.addSemanticIndexes = true,
@@ -33,6 +34,7 @@ class PagedSliverList<PageKeyType, ItemType> extends StatelessWidget {
     required this.pagingController,
     required this.builderDelegate,
     required IndexedWidgetBuilder separatorBuilder,
+    required this.scrollController,
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
     this.addSemanticIndexes = true,
@@ -45,6 +47,9 @@ class PagedSliverList<PageKeyType, ItemType> extends StatelessWidget {
 
   /// Corresponds to [PagedSliverBuilder.pagingController].
   final PagingController<PageKeyType, ItemType> pagingController;
+
+  // Corresponds to [ScrollView.controller].
+  final ScrollController scrollController;
 
   /// Corresponds to [PagedSliverBuilder.builderDelegate].
   final PagedChildBuilderDelegate<ItemType> builderDelegate;
@@ -74,6 +79,7 @@ class PagedSliverList<PageKeyType, ItemType> extends StatelessWidget {
   Widget build(BuildContext context) =>
       PagedSliverBuilder<PageKeyType, ItemType>(
         pagingController: pagingController,
+        scrollController: scrollController,
         builderDelegate: builderDelegate,
         completedListingBuilder: (
           context,

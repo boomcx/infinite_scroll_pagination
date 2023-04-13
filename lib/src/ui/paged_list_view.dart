@@ -17,7 +17,7 @@ class PagedListView<PageKeyType, ItemType> extends BoxScrollView {
     required this.pagingController,
     required this.builderDelegate,
     // Corresponds to [ScrollView.controller].
-    ScrollController? scrollController,
+    required this.scrollController,
     // Corresponds to [ScrollView.scrollDirection].
     Axis scrollDirection = Axis.vertical,
     // Corresponds to [ScrollView.reverse].
@@ -69,7 +69,7 @@ class PagedListView<PageKeyType, ItemType> extends BoxScrollView {
     required this.builderDelegate,
     required IndexedWidgetBuilder separatorBuilder,
     // Corresponds to [ScrollView.controller].
-    ScrollController? scrollController,
+    required this.scrollController,
     // Corresponds to [ScrollView.scrollDirection].
     Axis scrollDirection = Axis.vertical,
     // Corresponds to [ScrollView.reverse].
@@ -122,6 +122,9 @@ class PagedListView<PageKeyType, ItemType> extends BoxScrollView {
   /// Corresponds to [PagedSliverBuilder.builderDelegate].
   final PagedChildBuilderDelegate<ItemType> builderDelegate;
 
+  // Corresponds to [ScrollView.controller].
+  final ScrollController scrollController;
+
   /// The builder for list item separators, just like in [ListView.separated].
   final IndexedWidgetBuilder? _separatorBuilder;
 
@@ -147,6 +150,7 @@ class PagedListView<PageKeyType, ItemType> extends BoxScrollView {
         ? PagedSliverList<PageKeyType, ItemType>.separated(
             builderDelegate: builderDelegate,
             pagingController: pagingController,
+            scrollController: scrollController,
             separatorBuilder: separatorBuilder,
             addAutomaticKeepAlives: addAutomaticKeepAlives,
             addRepaintBoundaries: addRepaintBoundaries,
@@ -156,6 +160,7 @@ class PagedListView<PageKeyType, ItemType> extends BoxScrollView {
           )
         : PagedSliverList<PageKeyType, ItemType>(
             builderDelegate: builderDelegate,
+            scrollController: scrollController,
             pagingController: pagingController,
             addAutomaticKeepAlives: addAutomaticKeepAlives,
             addRepaintBoundaries: addRepaintBoundaries,

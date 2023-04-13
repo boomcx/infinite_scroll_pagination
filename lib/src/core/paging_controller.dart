@@ -10,6 +10,63 @@ typedef PagingStatusListener = void Function(
   PagingStatus status,
 );
 
+class PagingManualState {
+  PagingManualState({
+    this.showLoader = false,
+    this.isLoading = false,
+  });
+
+  /// Whether to display manual loaders
+  final bool showLoader;
+
+  /// Click to Loading
+  final bool isLoading;
+
+  PagingManualState copyWith({
+    bool? showLoader,
+    bool? isLoading,
+  }) =>
+      PagingManualState(
+        showLoader: showLoader ?? this.showLoader,
+        isLoading: isLoading ?? this.isLoading,
+      );
+}
+
+/// Manually click Load more when the list data is less than one page
+class PagingManualController extends ValueNotifier<PagingManualState> {
+  PagingManualController(value) : super(value);
+
+  // void showLoader() {
+  //   value = PagingManualState2.showManual;
+  //   notifyListeners();
+  // }
+
+  // void showLoading() {
+  //   value = PagingManualState2.showLoading;
+  //   notifyListeners();
+  // }
+
+  // void hide() {
+  //   value = PagingManualState2.blank;
+  //   notifyListeners();
+  // }
+
+  void init() {
+    value = value.copyWith(showLoader: false, isLoading: false);
+    notifyListeners();
+  }
+
+  void updateShowLoader(bool status) {
+    value = value.copyWith(showLoader: status);
+    notifyListeners();
+  }
+
+  void updateLoading(bool status) {
+    value = value.copyWith(isLoading: status);
+    notifyListeners();
+  }
+}
+
 /// A controller for a paged widget.
 ///
 /// If you modify the [itemList], [error] or [nextPageKey] properties, the
@@ -25,7 +82,7 @@ class PagingController<PageKeyType, ItemType>
     extends ValueNotifier<PagingState<PageKeyType, ItemType>> {
   PagingController({
     required this.firstPageKey,
-    this.invisibleItemsThreshold,
+    // this.invisibleItemsThreshold,
   }) : super(
           PagingState<PageKeyType, ItemType>(nextPageKey: firstPageKey),
         );
@@ -36,7 +93,7 @@ class PagingController<PageKeyType, ItemType>
   PagingController.fromValue(
     PagingState<PageKeyType, ItemType> value, {
     required this.firstPageKey,
-    this.invisibleItemsThreshold,
+    // this.invisibleItemsThreshold,
   }) : super(value);
 
   ObserverList<PagingStatusListener>? _statusListeners =
@@ -46,7 +103,8 @@ class PagingController<PageKeyType, ItemType>
       ObserverList<PageRequestListener<PageKeyType>>();
 
   /// The number of remaining invisible items that should trigger a new fetch.
-  final int? invisibleItemsThreshold;
+  /// when this value is 0, pagingController isn't auto loading
+  // final int? invisibleItemsThreshold;
 
   /// The key for the first page to be fetched.
   final PageKeyType firstPageKey;

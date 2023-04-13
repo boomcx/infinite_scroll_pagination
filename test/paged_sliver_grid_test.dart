@@ -297,6 +297,7 @@ Future<void> _pumpPagedSliverGrid({
           body: CustomScrollView(
             slivers: [
               PagedSliverGrid(
+                scrollController: ScrollController(),
                 pagingController: pagingController,
                 builderDelegate: PagedChildBuilderDelegate<String>(
                   itemBuilder: _buildItem,

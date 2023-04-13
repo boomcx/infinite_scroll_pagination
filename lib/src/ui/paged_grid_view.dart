@@ -16,7 +16,7 @@ class PagedGridView<PageKeyType, ItemType> extends BoxScrollView {
     required this.builderDelegate,
     required this.gridDelegate,
     // Corresponds to [ScrollView.controller].
-    ScrollController? scrollController,
+    required this.scrollController,
     // Corresponds to [ScrollView.scrollDirection].
     Axis scrollDirection = Axis.vertical,
     // Corresponds to [ScrollView.reverse].
@@ -70,6 +70,9 @@ class PagedGridView<PageKeyType, ItemType> extends BoxScrollView {
   /// Corresponds to [PagedSliverBuilder.builderDelegate].
   final PagedChildBuilderDelegate<ItemType> builderDelegate;
 
+  // Corresponds to [ScrollView.controller].
+  final ScrollController scrollController;
+
   /// Corresponds to [GridView.gridDelegate].
   final SliverGridDelegate gridDelegate;
 
@@ -98,6 +101,7 @@ class PagedGridView<PageKeyType, ItemType> extends BoxScrollView {
   Widget buildChildLayout(BuildContext context) =>
       PagedSliverGrid<PageKeyType, ItemType>(
         builderDelegate: builderDelegate,
+        scrollController: scrollController,
         pagingController: pagingController,
         gridDelegate: gridDelegate,
         addAutomaticKeepAlives: addAutomaticKeepAlives,

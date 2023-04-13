@@ -1,19 +1,27 @@
 /// Summarized information of a character.
+///  {
+//     "id": "0",
+//     "author": "Alejandro Escamilla",
+//     "width": 5616,
+//     "height": 3744,
+//     "url": "https://unsplash.com/...",
+//     "download_url": "https://picsum.photos/..."
+// }
 class CharacterSummary {
   CharacterSummary({
     required this.id,
-    required this.name,
-    required this.pictureUrl,
+    required this.author,
+    required this.url,
   });
 
   factory CharacterSummary.fromJson(Map<String, dynamic> json) =>
       CharacterSummary(
-        id: json['char_id'],
-        name: json['name'],
-        pictureUrl: json['img'],
+        id: json['id'],
+        author: json['author'],
+        url: json['download_url'],
       );
 
-  final int id;
-  final String name;
-  final String pictureUrl;
+  final String id;
+  final String author;
+  final String url;
 }
