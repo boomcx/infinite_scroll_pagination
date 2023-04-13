@@ -173,7 +173,8 @@ class PagingController<PageKeyType, ItemType>
 
   /// Erases the current error.
   void retryLastFailedRequest() {
-    error = null;
+    // error = null;
+    notifyPageRequestListeners(nextPageKey!);
   }
 
   /// Resets [value] to its initial state.

@@ -110,8 +110,8 @@ class _PagedSliverBuilderState<PageKeyType, ItemType>
 
   WidgetBuilder get _newPageErrorIndicatorBuilder =>
       _builderDelegate.newPageErrorIndicatorBuilder ??
-      (_) => NewPageErrorIndicator(
-            onTap: _pagingController.retryLastFailedRequest,
+      (_) => const NewPageErrorIndicator(
+          // onTap: _pagingController.retryLastFailedRequest,
           );
 
   WidgetBuilder get _firstPageProgressIndicatorBuilder =>
@@ -157,16 +157,11 @@ class _PagedSliverBuilderState<PageKeyType, ItemType>
       // 滚动到底部时加载更多
       if (_hasNextPage && pixels == maxScrollExtent && !_hasRequestedNextPage) {
         // Schedules the request for the end of this frame.
-        // if (_scrollController.offset > _lastScrollOffset) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _pagingController.notifyPageRequestListeners(_nextKey!);
         });
-        // _lastScrollOffset = _scrollController.offset;
-        // }
         _hasRequestedNextPage = true;
       }
-      // print(
-      //     '--- _scrollController.addListener ${_scrollController.position.maxScrollExtent} -- ${_scrollController.position.pixels}');
     });
   }
 
@@ -262,7 +257,13 @@ class _PagedSliverBuilderState<PageKeyType, ItemType>
                     itemList!,
                   ),
                   _itemCount,
-                  (context) => _newPageErrorIndicatorBuilder(context),
+                  (context) => GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () {
+                      _pagingController.retryLastFailedRequest();
+                    },
+                    child: _newPageErrorIndicatorBuilder(context),
+                  ),
                 );
                 break;
               case PagingStatus.noItemsFound:
@@ -295,8 +296,6 @@ class _PagedSliverBuilderState<PageKeyType, ItemType>
           },
         ),
       );
-
-  double _lastScrollOffset = 0;
 
   /// Connects the [_pagingController] with the [_builderDelegate] in order to
   /// create a list item widget and request more items if needed.
